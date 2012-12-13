@@ -4,47 +4,51 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Graph2DPanel extends JPanel {
+    private static final Color BACKGROUND_COLOR = Color.WHITE;
+    private static final Color LINE_COLOR = Color.BLACK;
+    private static final Color LIMIT_COLOR = Color.LIGHT_GRAY;
     private double[][] values;
     private int width;
-    private int stepCount;
+    private int current;
 
     public Graph2DPanel(double[][] values) {
         this.values = values;
         width = values[0].length;
-        stepCount = values.length;
+        current = 0;
     }
 
-    public double getValue(int oldX, int oldY) {
-        return values[getY(oldY)][getX(oldX)];
-    }
-
-    public int getX(int oldX) {
-        return oldX * width / getWidth();
-    }
-
-    public int getY(int oldY) {
-        return (getHeight() - oldY - 1) * stepCount / getHeight();
+    public void setCurrent(int index) {
+        current = index;
+        repaint();
     }
 
     @Override
     public void paint(Graphics g) {
-        for (int x = 0; x < getWidth(); x++) {
-            for (int y = 0; y < getHeight(); y++) {
-                g.setColor(getColorByValue(getValue(x, y)));
-                g.fillRect(x, y, 1, 1);
-            }
+        g.setColor(BACKGROUND_COLOR);
+        g.fillRect(0, 0, getWidth(), getHeight());
+        g.setColor(LIMIT_COLOR);
+        g.drawLine(0, getY(0.0), getWidth(), getY(0.0));
+        g.drawLine(0, getY(1.0), getWidth(), getY(1.0));
+        g.setColor(LINE_COLOR);
+        double[] row = values[current];
+        int prev = getY(row[0]);
+        int cur;
+        g.drawLine(getX(0), prev,  getX(1), prev);
+        for (int i = 1; i < width; ++i) {
+            cur = getY(row[i]);
+            g.drawLine(getX(i), prev, getX(i), cur);
+            g.drawLine(getX(i), cur, getX(i + 1), cur);
+            prev = cur;
         }
     }
 
-    private static Color getColorByValue(double value) {
-        if (value < 0) {
-            return new Color(0, 0, 255);
-        } else if (value > 1) {
-            return new Color(0, 255, 0);
-        } else {
-            return new Color((float) value, 0, 0);
-        }
+    private int getX(int index) {
+        return getWidth() * index / width;
     }
 
+    private int getY(double y) {
+        double scale = getHeight() / 3.0;
+        double zero = 2 * scale;
+        return (int) Math.round(zero - scale * y);
+    }
 }
-

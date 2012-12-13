@@ -6,14 +6,16 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 public class GraphFrame extends JFrame {
-    private Graph2DPanel panel;
+    private GraphColoredPanel panel;
     private StatusBar statusBar;
 
     public GraphFrame(double[][] values, String title) {
         setTitle(title);
 
         setLayout(new BorderLayout());
-        panel = new Graph2DPanel(values);
+        JPanel colorPanel = new JPanel();
+        colorPanel.setLayout(new BorderLayout());
+        panel = new GraphColoredPanel(values);
         panel.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -24,10 +26,18 @@ public class GraphFrame extends JFrame {
                 statusBar.setText("x = " + x + ", t = " + y + ", value = " + value);
             }
         });
-        add(panel, BorderLayout.CENTER);
-
         statusBar = new StatusBar();
-        add(statusBar, BorderLayout.SOUTH);
+        colorPanel.add(panel, BorderLayout.CENTER);
+        colorPanel.add(statusBar, BorderLayout.SOUTH);
+
+        GraphSlicePanel slicePanel = new GraphSlicePanel(values);
+//        add(slicePanel, BorderLayout.CENTER);
+
+        JTabbedPane mainPane = new JTabbedPane();
+        mainPane.addTab("Colored", colorPanel);
+        mainPane.addTab("Slice", slicePanel);
+
+        add(mainPane);
 
         setSize(values[0].length * 5 / 2, values.length * 5 / 2);
         setVisible(true);
